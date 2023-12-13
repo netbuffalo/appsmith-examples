@@ -1,0 +1,41 @@
+{
+  "version": "1.6.1",
+  "timeZone": "Asia/Tokyo",
+  "orderPreparation": {
+    "parameters": {
+      "mac": {
+        "type": "String"
+      }
+    },
+    "allowUndeclared": false
+  },
+  "jobResourceNames": [
+    "Default"
+  ],
+  "instructions": [
+    {
+      "TYPE": "Execute.Named",
+      "jobName": "Test",
+      "label": "Test"
+    }
+  ],
+  "jobs": {
+    "Test": {
+      "agentName": "localhost",
+      "withSubagentClusterIdExpr": false,
+      "executable": {
+        "TYPE": "ShellScriptExecutable",
+        "script": "#!/usr/bin/env /opt/venv/js/bin/python\nfrom workflow.job import job\nimport time\nimport os\nimport random\n\nmac = os.environ['mac']\nprint(f'### MAC: {mac}')\n\nr = round(random.random(), 1)\n\nupstreams = []\nupstreams.append({'id': 1, 'name': 'upstream-0', 'freq': 33.5, 'snr': 33 + r, 'tx': 41 + r})\nupstreams.append({'id': 2, 'name': 'upstream-1', 'freq': 39.9, 'snr': 32 + r, 'tx': 41 + r})\nupstreams.append({'id': 3, 'name': 'upstream-2', 'freq': 46.3, 'snr': 31 + r, 'tx': 41 + r})\nupstreams.append({'id': 4, 'name': 'upstream-3', 'freq': 52.1, 'snr': 35 + r, 'tx': 41 + r})\n\ndownstreams = []\ndownstreams.append({'id': 1, 'name': 'downstream-0', 'freq': 297, 'snr': 33 + r, 'rx': 10 + r})\ndownstreams.append({'id': 2, 'name': 'downstream-1', 'freq': 303, 'snr': 34 + r, 'rx': 20 + r})\ndownstreams.append({'id': 3, 'name': 'downstream-2', 'freq': 309, 'snr': 32 + r, 'rx': 30 + r})\ndownstreams.append({'id': 4, 'name': 'downstream-3', 'freq': 312, 'snr': 31 + r, 'rx': 10 + r})\ndownstreams.append({'id': 5, 'name': 'downstream-4', 'freq': 318, 'snr': 30 + r, 'rx': 20 + r})\ndownstreams.append({'id': 6, 'name': 'downstream-5', 'freq': 324, 'snr': 35 + r, 'rx': 10 + r})\ndownstreams.append({'id': 7, 'name': 'downstream-6', 'freq': 330, 'snr': 33 + r, 'rx': 12 + r})\ndownstreams.append({'id': 8, 'name': 'downstream-7', 'freq': 336, 'snr': 34 + r, 'rx': 10 + r})\n\ncpes = []\ncpes.append({'mac': 'cc:cc:cc:00:00:01', 'ipv4': '192.168.1.100', 'ipv6': 'fe80::2c33:5aff:fe8a:b874'})\n\nuptime_string = ''\nwith open('/proc/uptime', 'r') as f:\n    total_seconds = float(f.readline().split()[0])\n\n    # Helper vars:\n    MINUTE  = 60\n    HOUR    = MINUTE * 60\n    DAY     = HOUR * 24\n\n    # Get the days, hours, etc:\n    days    = int( total_seconds / DAY )\n    hours   = int( ( total_seconds % DAY ) / HOUR )\n    minutes = int( ( total_seconds % HOUR ) / MINUTE )\n    seconds = int( total_seconds % MINUTE )\n\n    # Build up the pretty uptime_string (like this: 'N days, N hours, N minutes, N seconds')\n    if days > 0:\n        uptime_string += str(days) + ' ' + (days == 1 and 'day' or 'days' ) + ', '\n    if len(uptime_string) > 0 or hours > 0:\n        uptime_string += str(hours) + ' ' + (hours == 1 and 'hour' or 'hours' ) + ', '\n    if len(uptime_string) > 0 or minutes > 0:\n        uptime_string += str(minutes) + ' ' + (minutes == 1 and 'minute' or 'minutes' ) + ', '\n\n    uptime_string += str(seconds) + ' ' + (seconds == 1 and 'second' or 'seconds' )\n\n\n\ndata = {'upstreams': upstreams, 'downstreams': downstreams, 'cpes': cpes, 'uptime': uptime_string}\n\njob.response(data)",
+        "env": {
+          "mac": "$mac"
+        },
+        "v1Compatible": false
+      },
+      "skipIfNoAdmissionForOrderDay": false,
+      "parallelism": 1,
+      "graceTimeout": 1,
+      "failOnErrWritten": false,
+      "warnOnErrWritten": false
+    }
+  }
+}
