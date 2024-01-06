@@ -1,0 +1,41 @@
+{
+  "version": "1.6.1",
+  "timeZone": "Asia/Tokyo",
+  "orderPreparation": {
+    "parameters": {
+      "ipv4": {
+        "type": "String"
+      }
+    },
+    "allowUndeclared": false
+  },
+  "jobResourceNames": [
+    "Default"
+  ],
+  "instructions": [
+    {
+      "TYPE": "Execute.Named",
+      "jobName": "ping",
+      "label": "ping"
+    }
+  ],
+  "jobs": {
+    "ping": {
+      "agentName": "localhost",
+      "withSubagentClusterIdExpr": false,
+      "executable": {
+        "TYPE": "ShellScriptExecutable",
+        "script": "#!/usr/bin/env /opt/venv/js/bin/python\nfrom workflow.job import job\nimport os\nimport subprocess\n\nipv4 = os.environ['ipv4']\n\ntimeout = 30\ncommand = f'ping -c3 {ipv4}'\nprocess = subprocess.run(command,\n                      stdout=subprocess.PIPE,\n                      stderr=subprocess.PIPE,\n                      text=True,\n                      check=False,\n                      shell=True,\n                      timeout=timeout,\n                      input=None)\n\n   \ndata = {'stdout': process.stdout, 'stderr': process.stderr}\n\njob.response(data)\n",
+        "env": {
+          "ipv4": "$ipv4"
+        },
+        "v1Compatible": false
+      },
+      "skipIfNoAdmissionForOrderDay": false,
+      "parallelism": 1,
+      "graceTimeout": 1,
+      "failOnErrWritten": false,
+      "warnOnErrWritten": false
+    }
+  }
+}
